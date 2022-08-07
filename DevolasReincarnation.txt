@@ -380,7 +380,7 @@ class OPEN_OT_FixMats(bpy.types.Operator):
         object = bpy.context.active_object 
         
         scene = context.scene
-        file_tool = scene.conf_path
+        file_tool = bpy.path.abspath(scene.conf_path)
         
         dir_list = []
         mso_list = []
