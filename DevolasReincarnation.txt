@@ -1,5 +1,6 @@
 import bpy
 import os
+import json
 
 
 class Devola_PT_Panel(bpy.types.Panel):
@@ -12,6 +13,8 @@ class Devola_PT_Panel(bpy.types.Panel):
     
     def draw(self, context):
         layout = self.layout
+        scene = context.scene
+        cvalue = scene.custom_values
         
         row = layout.row()
         row.label(text= "Automatic operators")
@@ -44,7 +47,7 @@ class Devola_PT_Panel(bpy.types.Panel):
         
         col = layout.column()
         
-        col.prop(context.scene, 'conf_path')
+        col.prop(cvalue, 'rein_path')
         
         row = layout.row()
         
@@ -58,8 +61,30 @@ class Devola_PT_Panel(bpy.types.Panel):
         row = layout.row()        
         row.label(text= "Test Script DevolasRevenge")
         row.label(text= "", icon= 'FUND')  
-                
         
+        
+class DevolaOpen_PT_Panel(bpy.types.Panel):
+    bl_idname = "WEIGHTS_PT_panel"
+    bl_label = "Custom Weights Manager"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Devola'
+    
+    
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        cvalue = scene.custom_values
+ 
+        layout = self.layout
+        
+        col = layout.column()
+        
+        col.prop(cvalue, 'json_path')
+        
+        row = layout.row()
+             
+                
 
         
 ##----------------------------------------------------------------
@@ -380,12 +405,13 @@ class OPEN_OT_FixMats(bpy.types.Operator):
         object = bpy.context.active_object 
         
         scene = context.scene
-        file_tool = bpy.path.abspath(scene.conf_path)
+        file_tool = bpy.path.abspath(scene.custom_values.rein_path)
         
         dir_list = []
         mso_list = []
         mso_string = "mso_.png"
         
+        #redundant?
         for path in os.listdir(file_tool):
             if (os.path.isfile(os.path.join(file_tool, path))):
                 dir_list.append(path)
@@ -396,33 +422,42 @@ class OPEN_OT_FixMats(bpy.types.Operator):
                   
         
         for material in bpy.data.materials:
+            #makes sure each material starts with mt_
             if not material.name.startswith("mt_"): continue
+            #sets material type to hashed to fix bad backface culling
             material.blend_method = 'HASHED'
             
-                        
+            #isolates the material name and removed the mt_ from it -- then stores it in a variable            
             clean_name = material.name
             clean_name = (clean_name.replace('mt_', ''))
             
-                    
+            #appends a MSO texture string to MSO_value as long as they have a clean_name inside of it
             mso_value = [i for i in mso_list if clean_name in i]
             
+            #turns the MSO_value list into a string
             image_value = ''.join(mso_value)
             image_value = file_tool + "\\" + image_value
             print(image_value)
             #image_value = bpy.data.images.load(filepath = image_value)
+            
+            
+            #establishes material node and tree node values
+            material.use_nodes = True
+            nodes = material.node_tree.nodes
+            links = material.node_tree.links
+            
+            #resets Principled BSDF values
+            nodes["Principled BSDF"].inputs['Specular'].default_value = 0.1
+            nodes["Principled BSDF"].inputs['Emission Strength'].default_value = 0.0
             
             ##checks for empty MSO filepath
             if not mso_value:
                 continue
             else:
                 #adds the MSO map
-                material.use_nodes = True
-                nodes = material.node_tree.nodes
                 inode = nodes.new('ShaderNodeTexImage')
                 inode.location = (-1000,0)
-                inode.image = bpy.data.images.load(image_value)
-                
-                links = material.node_tree.links
+                inode.image = bpy.data.images.load(image_value)       
                 
                 RGB_split = nodes.new('ShaderNodeSeparateRGB')
                 RGB_split.location = (-700,0)
@@ -436,32 +471,43 @@ class OPEN_OT_FixMats(bpy.types.Operator):
                 links.new(Invert_gloss.inputs['Color'], RGB_split.outputs[1])
                 links.new(nodes["Principled BSDF"].inputs['Roughness'], Invert_gloss.outputs[0])
                 
-                nodes["Principled BSDF"].inputs['Specular'].default_value = 0.1
-                nodes["Principled BSDF"].inputs['Emission Strength'].default_value = 0.0
-                
     
         
         return {'FINISHED'}
-
-
-classes = [Devola_PT_Panel, OPEN_OT_WeightMix, OPEN_OT_BoneRename, OPEN_OT_ConvertMesh, OPEN_OT_FixMats]
-
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-        bpy.types.Scene.conf_path = bpy.props.StringProperty \
-          (
+    
+    
+    
+class MyProperties(bpy.types.PropertyGroup):
+    
+    rein_path : bpy.props.StringProperty(
           name = "Rein Path",
           default = "",
           description = "Choose the Rein Model Folder",
           subtype = 'DIR_PATH'
           )
+          
+    json_path : bpy.props.StringProperty(
+          name = "JSON Path",
+          default = "",
+          description = "Choose your JSON file",
+          subtype = 'DIR_PATH'
+          )
+
+
+classes = [MyProperties, Devola_PT_Panel, DevolaOpen_PT_Panel, OPEN_OT_WeightMix, OPEN_OT_BoneRename, OPEN_OT_ConvertMesh, OPEN_OT_FixMats]
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+        bpy.types.Scene.custom_values = bpy.props.PointerProperty(type= MyProperties)
+          
 
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
-        del bpy.types.Scene.conf_path
+        del bpy.types.Scene.custom_values
+       
     
 if __name__ == "__main__":
     register()
