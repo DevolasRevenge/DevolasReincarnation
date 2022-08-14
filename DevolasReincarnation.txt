@@ -1,6 +1,7 @@
 import bpy
 import os
 import json
+from math import radians
 
 
 class Devola_PT_Panel(bpy.types.Panel):
@@ -17,46 +18,52 @@ class Devola_PT_Panel(bpy.types.Panel):
         cvalue = scene.custom_values
         
         row = layout.row()
+        row.label(text= "Armature Selector")
+        row = layout.row()
+        row.label(text= "REIN Armature", icon= 'OUTLINER_DATA_ARMATURE')
+        row.prop_search(cvalue, "reinobjectname", bpy.data, "objects", text="")
+        
+        row = layout.row()
+        row.label(text= "NieR Armature", icon= 'OUTLINER_DATA_ARMATURE')
+        row.prop_search(cvalue, "nierobjectname", bpy.data, "objects", text="")
+        
+        
+        
+        row = layout.row()
         row.label(text= "Automatic operators")
         row = layout.row()
-        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')
-                                    
-        row.operator("open.weightmix")
-        
-        layout = self.layout
-        
+        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')                                    
+        row.operator("open.weightmix")        
+
+
+        row = layout.row()
+        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')                                    
+        row.operator("open.posebones") 
         
         
         row = layout.row()
-        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')
-                            
-        row.operator("open.applymod")
-        
-    
-        layout = self.layout
-        
+        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')                            
+        row.operator("open.applymod")              
         
         
         row = layout.row()
-        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')
-                            
+        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')                            
         row.operator("open.bonerename")
         
-        
-        layout = self.layout
-        
-        col = layout.column()
-        
-        col.prop(cvalue, 'rein_path')
-        
         row = layout.row()
+        row.label(text= "Fix Rein Materials")
+     
+        row = layout.row()
+        row.label(text= "", icon= 'FILE_FOLDER')          
+        row.prop(cvalue, 'rein_path')
         
-        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')
-                            
+        row = layout.row()        
+        row.label(text= "Scene", icon= 'BLENDER')                            
         row.operator("open.fixmats")
         
-        
-        
+        row = layout.row()                                  
+        row.operator("open.test")
+
         
         row = layout.row()        
         row.label(text= "Test Script DevolasRevenge")
@@ -96,183 +103,192 @@ class OPEN_OT_WeightMix(bpy.types.Operator):
     
     def execute(self, context):
         
-        object = bpy.context.active_object
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object] 
         
-        modifier = object.modifiers.new(name="Right_Leg_1", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "right_upleg"
-        modifier.vertex_group_b = "sub_62"
+        for object in armature_name.children:
+            if object.type == 'MESH':
+    
+                modifier = object.modifiers.new(name="Right_Leg_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_upleg"
+                modifier.vertex_group_b = "sub_62"
 
 
-        modifier = object.modifiers.new(name="Right_Leg_2", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "right_upleg"
-        modifier.vertex_group_b = "sub_60"
+                modifier = object.modifiers.new(name="Right_Leg_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_upleg"
+                modifier.vertex_group_b = "sub_60"
 
 
-        modifier = object.modifiers.new(name="Left_Leg_1", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "left_upleg"
-        modifier.vertex_group_b = "sub_61"
+                modifier = object.modifiers.new(name="Left_Leg_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_upleg"
+                modifier.vertex_group_b = "sub_61"
 
-        modifier = object.modifiers.new(name="Left_Leg_2", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "left_upleg"
-        modifier.vertex_group_b = "sub_63"
+                modifier = object.modifiers.new(name="Left_Leg_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_upleg"
+                modifier.vertex_group_b = "sub_63"
 
-        modifier = object.modifiers.new(name="Left_Arm_1", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "left_arm"
-        modifier.vertex_group_b = "sub_71"
+                modifier = object.modifiers.new(name="Left_Arm_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_arm"
+                modifier.vertex_group_b = "sub_71"
 
-        modifier = object.modifiers.new(name="Left_Arm_2", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "left_arm"
-        modifier.vertex_group_b = "sub_73"
+                modifier = object.modifiers.new(name="Left_Arm_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_arm"
+                modifier.vertex_group_b = "sub_73"
 
-        modifier = object.modifiers.new(name="Right_Arm_1", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "right_arm"
-        modifier.vertex_group_b = "sub_70"
+                modifier = object.modifiers.new(name="Right_Arm_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_arm"
+                modifier.vertex_group_b = "sub_70"
 
-        modifier = object.modifiers.new(name="Right_Arm_2", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "right_arm"
-        modifier.vertex_group_b = "sub_72"
+                modifier = object.modifiers.new(name="Right_Arm_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_arm"
+                modifier.vertex_group_b = "sub_72"
 
-        modifier = object.modifiers.new(name="Head1", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_c_upper_lip"
+                modifier = object.modifiers.new(name="Head1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_c_upper_lip"
 
-        modifier = object.modifiers.new(name="Head2", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_upper_lip"
+                modifier = object.modifiers.new(name="Head2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_upper_lip"
 
-        modifier = object.modifiers.new(name="Head3", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_upper_lip"
+                modifier = object.modifiers.new(name="Head3", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_upper_lip"
 
-        modifier = object.modifiers.new(name="Head4", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_upper_lip"
+                modifier = object.modifiers.new(name="Head4", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_upper_lip"
 
-        modifier = object.modifiers.new(name="Head5", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_outer_lip"
+                modifier = object.modifiers.new(name="Head5", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_outer_lip"
 
-        modifier = object.modifiers.new(name="Head6", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_outer_lip"
+                modifier = object.modifiers.new(name="Head6", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_outer_lip"
 
-        modifier = object.modifiers.new(name="Head7", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_brow1"
+                modifier = object.modifiers.new(name="Head7", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_brow1"
 
-        modifier = object.modifiers.new(name="Head8", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_brow2"
+                modifier = object.modifiers.new(name="Head8", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_brow2"
 
-        modifier = object.modifiers.new(name="Head9", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_brow3"
+                modifier = object.modifiers.new(name="Head9", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_brow3"
 
-        modifier = object.modifiers.new(name="Head9", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_brow3"
+                modifier = object.modifiers.new(name="Head9", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_brow3"
 
-        modifier = object.modifiers.new(name="Head10", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_eye"
+                modifier = object.modifiers.new(name="Head10", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_eye"
 
-        modifier = object.modifiers.new(name="Head10", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_inner_eyelid"
+                modifier = object.modifiers.new(name="Head10", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_inner_eyelid"
 
-        modifier = object.modifiers.new(name="Head11", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_lower_eyelid"
+                modifier = object.modifiers.new(name="Head11", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_lower_eyelid"
 
-        modifier = object.modifiers.new(name="Head12", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_l_outer_eyelid"
+                modifier = object.modifiers.new(name="Head12", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_l_outer_eyelid"
 
-        modifier = object.modifiers.new(name="Head13", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_brow1"
+                modifier = object.modifiers.new(name="Head13", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_brow1"
 
-        modifier = object.modifiers.new(name="Head14", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_brow2"
+                modifier = object.modifiers.new(name="Head14", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_brow2"
 
-        modifier = object.modifiers.new(name="Head15", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_brow3"
+                modifier = object.modifiers.new(name="Head15", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_brow3"
 
-        modifier = object.modifiers.new(name="Head16", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_eye"
+                modifier = object.modifiers.new(name="Head16", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_eye"
 
-        modifier = object.modifiers.new(name="Head17", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_inner_eyelid"
+                modifier = object.modifiers.new(name="Head17", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_inner_eyelid"
 
-        modifier = object.modifiers.new(name="Head18", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_lower_eyelid"
+                modifier = object.modifiers.new(name="Head18", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_lower_eyelid"
 
-        modifier = object.modifiers.new(name="Head18", type='VERTEX_WEIGHT_MIX')
-        modifier.mix_set = 'ALL'
-        modifier.mix_mode = 'ADD'
-        modifier.vertex_group_a = "head"
-        modifier.vertex_group_b = "fc_r_outer_eyelid"
+                modifier = object.modifiers.new(name="Head18", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "head"
+                modifier.vertex_group_b = "fc_r_outer_eyelid"
+                
+        print ("Weight-mix Modifiers Added")
         
         return {'FINISHED'} 
         
@@ -285,7 +301,14 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
     
     def execute(self, context):
         
-        object = bpy.context.active_object
+
+        #object = bpy.context.active_object
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object] 
         
         namelist = [("left_toe", "bone139"),
             ("right_foot", "bone134"),
@@ -362,12 +385,14 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
 
         for name, newname in namelist:
             # get the pose bone with name
-            pb = object.pose.bones.get(name)
+            pb = armature_name.pose.bones.get(name)
             # continue if no bone of that name
             if pb is None:
                 continue
             # rename
             pb.name = newname
+            
+        print ("Bones Renamed")
             
         return {'FINISHED'} 
 
@@ -381,13 +406,23 @@ class OPEN_OT_ConvertMesh(bpy.types.Operator):
     
     def execute(self, context):
         
-        object = bpy.context.active_object 
         
-        bpy.ops.object.convert(target='MESH')
-        
-        bpy.ops.object.modifier_add(type='ARMATURE')  
-        bpy.context.object.modifiers["Armature"].object = bpy.data.objects["Armature"]
+        scene = context.scene        
+        cvalue = scene.custom_values
 
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object] 
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
+                bpy.ops.object.convert(target='MESH')        
+                bpy.ops.object.modifier_add(type='ARMATURE')  
+                bpy.context.object.modifiers["Armature"].object = armature_name
+                child.select = False
+        
+        print ("Modifiers Applied")
         
         return {'FINISHED'} 
     
@@ -472,9 +507,78 @@ class OPEN_OT_FixMats(bpy.types.Operator):
                 links.new(nodes["Principled BSDF"].inputs['Roughness'], Invert_gloss.outputs[0])
                 
     
-        
+            print ("Materials Adjusted")
+            
         return {'FINISHED'}
     
+##----------------------------------------------------- 
+          
+class OPEN_OT_BONEPOSER(bpy.types.Operator):
+    """Pose Bones"""
+    bl_label = "Pose Bones (to A2)"
+    bl_idname = "open.posebones"
+    
+    def execute(self, context):
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        rein_object = cvalue.reinobjectname
+        rein_name = bpy.data.objects[rein_object]
+        
+        nier_object = cvalue.nierobjectname
+        nier_name = bpy.data.objects[nier_object]                    
+        
+        armature = rein_name.data
+        
+        bpy.context.view_layer.objects.active = rein_name
+
+        scene.tool_settings.transform_pivot_point = 'INDIVIDUAL_ORIGINS'
+
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        all_bones = []
+
+        #edit mode bone rotation
+        
+        for bone in armature.bones:
+            all_bones.append(bone.name)
+        for i in all_bones:
+            armature.edit_bones[i].select_tail=False
+            armature.edit_bones[i].select_head=False
+            armature.edit_bones[i].select=False  
+
+        left_arm_list = ['left_arm', 'left_shoulder', 'left_forearm']
+
+        for i in left_arm_list:
+            armature.edit_bones[i].select_tail=True
+            bpy.ops.transform.rotate(value=radians(-90), orient_axis='Z', orient_type='LOCAL', constraint_axis=(False, False, True))
+            armature.edit_bones[i].select_tail=False
+
+        right_arm_list = ['right_arm', 'right_shoulder', 'right_forearm']
+
+        for i in right_arm_list:
+            armature.edit_bones[i].select_tail=True
+            bpy.ops.transform.rotate(value=radians(90), orient_axis='Z', orient_type='LOCAL', constraint_axis=(False, False, True))
+            armature.edit_bones[i].select_tail=False
+            
+        leg_list = ['left_upleg', 'right_upleg']
+
+        for i in leg_list:
+            armature.edit_bones[i].select_tail=True
+            bpy.ops.transform.rotate(value=radians(180), orient_axis='Z', orient_type='LOCAL', constraint_axis=(False, False, True))
+            armature.edit_bones[i].select_tail=False
+            
+        #pose mode bone constraints
+            
+        bpy.ops.object.mode_set(mode='POSE')      
+        
+
+        
+        return {'FINISHED'}     
+    
+    
+##-----------------------------------------------------     
     
     
 class MyProperties(bpy.types.PropertyGroup):
@@ -492,9 +596,47 @@ class MyProperties(bpy.types.PropertyGroup):
           description = "Choose your JSON file",
           subtype = 'DIR_PATH'
           )
+          
+    reinobjectname : bpy.props.StringProperty(
+          name = "Armature Select",
+          default = "",
+          description = "Choose REIN Armature",
+          )
+          
+    nierobjectname : bpy.props.StringProperty(
+          name = "Armature Select",
+          default = "",
+          description = "Choose REIN Armature",
+          )
+          
+##----------------------------------------------------- 
+          
+class OPEN_OT_TEST(bpy.types.Operator):
+    """TEST"""
+    bl_label = "TEST"
+    bl_idname = "open.test"
+    
+    def execute(self, context):
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object]                    
+        
+        #actual armature
+        print(armature_name)
+        
+        #armature name
+        print(armature_name.name)
+
+        
+        return {'FINISHED'} 
+    
+##----------------------------------------------------- 
 
 
-classes = [MyProperties, Devola_PT_Panel, DevolaOpen_PT_Panel, OPEN_OT_WeightMix, OPEN_OT_BoneRename, OPEN_OT_ConvertMesh, OPEN_OT_FixMats]
+classes = [MyProperties, Devola_PT_Panel, DevolaOpen_PT_Panel, OPEN_OT_WeightMix, OPEN_OT_BoneRename, OPEN_OT_ConvertMesh, OPEN_OT_FixMats, OPEN_OT_BONEPOSER]
 
 def register():
     for cls in classes:
