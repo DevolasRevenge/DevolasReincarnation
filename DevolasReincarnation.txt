@@ -33,7 +33,7 @@ class Devola_PT_Panel(bpy.types.Panel):
         row.label(text= "Automatic operators")
         row = layout.row()
         
-        row.label(text= "Selected", icon= 'RESTRICT_SELECT_OFF')
+        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')
         row.operator("open.scalemesh")
         row = layout.row()
         
@@ -115,10 +115,11 @@ class OPEN_OT_ScaleNIER(bpy.types.Operator):
          arm_object = cvalue.reinobjectname
          armature_name = bpy.data.objects[arm_object]
               
-         #selected = bpy.context.view_layer.objects.active
          armature_name.scale[0] = 1
          armature_name.scale[1] = 1
-         armature_name.scale[2] = 1   
+         armature_name.scale[2] = 1
+         
+         print ('Rein armature scale set to 1')   
                 
          return {'FINISHED'} 
          
@@ -408,7 +409,7 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
             ("left_upleg", "bone136"),
             ("right_upleg", "bone132"),
             ("fc_l_upper_eyelid", "bone8"),
-            ("fc_r_upper_eyelid", "bone8")                    
+            ("fc_r_upper_eyelid", "bone7")                    
             ]
 
         for name, newname in namelist:
@@ -439,19 +440,32 @@ class OPEN_OT_ConvertMesh(bpy.types.Operator):
         cvalue = scene.custom_values
 
         arm_object = cvalue.reinobjectname
-        armature_name = bpy.data.objects[arm_object] 
+        armature_name = bpy.data.objects[arm_object]
+         
         
         for child in armature_name.children:
             if child.type == 'MESH':
                 child.select = True
                 bpy.context.view_layer.objects.active = child
                 bpy.ops.object.convert(target='MESH')
+            child.select = False
+        
+                
+        bpy.context.view_layer.objects.active = armature_name
+        bpy.ops.object.mode_set(mode='POSE')        
+        bpy.ops.pose.armature_apply(selected=False)
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
                 if (cvalue.add_armature_check == True):        
                     bpy.ops.object.modifier_add(type='ARMATURE')  
                     bpy.context.object.modifiers["Armature"].object = armature_name
                 child.select = False
         
-        print ("Modifiers Applied")
+        print ("Modifiers Applied + Applied Armature Rest Pose")
         
         return {'FINISHED'} 
     
@@ -642,6 +656,8 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
             rein_constraint.invert_y = True
             rein_constraint.mix_mode = 'BEFORE'
             
+        print ("Bones Posed")
+            
         #Permenantly Apply Constraints Toggle    
         if (cvalue.apply_constraints_check == True):
             arm_object = cvalue.reinobjectname
@@ -662,7 +678,7 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
                 constraint_list = [ c for c in bone.constraints]
                 for c in constraint_list:
                     bone.constraints.remove(c)
-            print ("removed bone constraints")
+            print ("Removed Bone Constraints + Applied Armature Rest Pose")
                     
             for child in armature_name.children:
                 if child.type == 'MESH':
