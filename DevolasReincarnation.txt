@@ -509,11 +509,20 @@ class OPEN_OT_FixMats(bpy.types.Operator):
             clean_name = material.name
             clean_name = (clean_name.replace('mt_', ''))
             
+            #removes the 0.001 from names in clean_name in order for the script to work on them
+            period = "."
+            if period in clean_name:                
+                clean_name = clean_name[:-4]
+                
             #appends a MSO texture string to MSO_value as long as they have a clean_name inside of it
             mso_value = [i for i in mso_list if clean_name in i]
             
             #turns the MSO_value list into a string
             image_value = ''.join(mso_value)
+            print(image_value)
+            
+            existing_image = image_value
+            
             image_value = file_tool + "\\" + image_value
             print(image_value)
             #image_value = bpy.data.images.load(filepath = image_value)
@@ -535,7 +544,12 @@ class OPEN_OT_FixMats(bpy.types.Operator):
                 #adds the MSO map
                 inode = nodes.new('ShaderNodeTexImage')
                 inode.location = (-1000,0)
-                inode.image = bpy.data.images.load(image_value)       
+                
+                #if the image has already been imported in the scene, it uses that. Otherwise it imports the image.
+                if existing_image in bpy.data.images:
+                    inode.image = bpy.data.images[existing_image]
+                else:                
+                    inode.image = bpy.data.images.load(image_value)       
                 
                 RGB_split = nodes.new('ShaderNodeSeparateRGB')
                 RGB_split.location = (-700,0)
