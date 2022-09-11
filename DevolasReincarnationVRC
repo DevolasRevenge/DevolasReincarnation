@@ -1,0 +1,597 @@
+import bpy
+import os
+import json
+from math import radians
+
+
+class Devola_PT_Panel(bpy.types.Panel):
+    bl_idname = "ARMATURE_PT_panel"
+    bl_label = "VRC - REIN Weights Manager"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Devola'
+    
+    
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+        cvalue = scene.custom_values
+        
+        row = layout.row()
+        row.label(text= "Armature Selector")
+        row = layout.row()
+        row.label(text= "REIN Armature", icon= 'OUTLINER_DATA_ARMATURE')
+        row.prop_search(cvalue, "reinobjectname", bpy.data, "objects", text="")
+        
+        
+        
+        
+        row = layout.row()
+        row.label(text= "Automatic operators")
+        row = layout.row()
+        
+        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')
+        row.operator("open.scalemesh")
+        row = layout.row()
+        
+        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')                                    
+        row.operator("open.weightmix")        
+        
+        
+        row = layout.row()
+        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')                            
+        row.operator("open.applymod")              
+        row = layout.row()
+        row.prop(cvalue, "add_armature_check")
+        
+        row = layout.row()
+        row.label(text= "Armature", icon= 'OUTLINER_DATA_ARMATURE')                            
+        row.operator("open.bonerename")
+        
+        row = layout.row()
+        row.label(text= "Body Mesh", icon= 'OUTLINER_OB_MESH')                            
+        row.operator("open.removeexcess")              
+        
+        row = layout.row()
+        row.label(text= "Fix Rein Materials")
+     
+        row = layout.row()
+        row.label(text= "", icon= 'FILE_FOLDER')          
+        row.prop(cvalue, 'rein_path')
+        
+        row = layout.row()        
+        row.label(text= "Scene", icon= 'BLENDER')                            
+        row.operator("open.fixmats")
+        
+        #row = layout.row()                                  
+        #row.operator("open.test")
+
+        
+        row = layout.row()
+        row.label(text= "DevolasRevenge Script")     
+        row.label(text= "", icon= 'FUND')    
+        row = layout.row()
+        row.label(text= "Inculta Branch")
+        row.label(text= "", icon= 'KEYTYPE_KEYFRAME_VEC')  
+        
+        
+        
+        
+##----------------------------------------------------------------
+                        
+class OPEN_OT_ScaleNIER(bpy.types.Operator):
+    """Scales REIN mesh to Nier Dimensions"""
+    bl_label = "Scale Rein Objects"
+    bl_idname = "open.scalemesh"
+    
+    def execute(self, context):
+         
+         scene = context.scene        
+         cvalue = scene.custom_values
+
+         arm_object = cvalue.reinobjectname
+         armature_name = bpy.data.objects[arm_object]
+              
+         armature_name.scale[0] = 1
+         armature_name.scale[1] = 1
+         armature_name.scale[2] = 1
+         
+         print ('Rein armature scale set to 1')   
+                
+         return {'FINISHED'} 
+         
+##----------------------------------------------------------------
+                        
+class OPEN_OT_WeightMix(bpy.types.Operator):
+    """Add Weight Mix Modifiers for Rein Mesh"""
+    bl_label = "Mix Weights"
+    bl_idname = "open.weightmix"
+    
+    def execute(self, context):
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object] 
+        
+        for object in armature_name.children:
+            if object.type == 'MESH':
+                
+                modifier = object.modifiers.new(name="Neck", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "neck"
+                modifier.vertex_group_b = "sub_02"
+    
+                modifier = object.modifiers.new(name="Left_Forearm", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_forearm"
+                modifier.vertex_group_b = "sub_20"
+                
+                modifier = object.modifiers.new(name="Right_Forearm", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_forearm"
+                modifier.vertex_group_b = "sub_10"
+    
+                modifier = object.modifiers.new(name="Hips", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "hip"
+                modifier.vertex_group_b = "spine1"
+
+                modifier = object.modifiers.new(name="Right_Leg_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_upleg"
+                modifier.vertex_group_b = "sub_60"
+
+                modifier = object.modifiers.new(name="Left_Leg_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_upleg"
+                modifier.vertex_group_b = "sub_61"
+                
+                modifier = object.modifiers.new(name="Right_Leg_3", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_upleg"
+                modifier.vertex_group_b = "sub_62"
+
+                modifier = object.modifiers.new(name="Left_Leg_3", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_upleg"
+                modifier.vertex_group_b = "sub_63"
+
+                modifier = object.modifiers.new(name="Left_Arm_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_arm"
+                modifier.vertex_group_b = "sub_71"
+
+                modifier = object.modifiers.new(name="Left_Arm_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "left_arm"
+                modifier.vertex_group_b = "sub_73"
+
+                modifier = object.modifiers.new(name="Right_Arm_1", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_arm"
+                modifier.vertex_group_b = "sub_70"
+
+                modifier = object.modifiers.new(name="Right_Arm_2", type='VERTEX_WEIGHT_MIX')
+                modifier.mix_set = 'ALL'
+                modifier.mix_mode = 'ADD'
+                modifier.vertex_group_a = "right_arm"
+                modifier.vertex_group_b = "sub_72"
+
+                
+        print ("Weight-mix Modifiers Added")
+        
+        return {'FINISHED'} 
+        
+##-----------------------------------------------------
+    
+class OPEN_OT_BoneRename(bpy.types.Operator):
+    """Rename Rein Armature Bones to NieR:Automata Bones"""
+    bl_label = "Rename Bones (to VRC)"
+    bl_idname = "open.bonerename"
+    
+    def execute(self, context):
+        
+
+        #object = bpy.context.active_object
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object] 
+        
+        namelist = [("hip", "Hips"),
+                    ("left_upleg", "Left leg"),
+                    ("right_upleg", "Right leg"),
+                    ("left_leg", "Left knee"),
+                    ("right_leg", "Right knee"),
+                    ("left_foot", "Left ankle"),
+                    ("right_foot", "Right ankle"),
+                    ("left_toe", "Left toe"),
+                    ("right_toe", "Right toe"),
+                    ("spine2", "Spine"),
+                    ("spine3", "Chest"),
+                    ("left_shoulder", "Left shoulder"),
+                    ("right_shoulder", "Right shoulder"),
+                    ("left_arm", "Left arm"),
+                    ("right_arm", "Right arm"),
+                    ("left_forearm", "Left elbow"),
+                    ("right_forearm", "Right elbow"),
+                    ("left_hand", "Left wrist"),
+                    ("right_hand", "Right wrist"),
+                    ("left_hand_index2", "Left_Hand_Index2"),
+                    ("left_hand_index3", "Left_Hand_Index3"),
+                    ("left_hand_index4", "Left_Hand_Index4"),
+                    ("left_hand_middle2", "Left_Hand_Middle2"),
+                    ("left_hand_middle3", "Left_Hand_Middle3"),
+                    ("left_hand_middle4", "Left_Hand_Middle4"),
+                    ("left_hand_pinky2", "Left_Hand_Pinky2"),
+                    ("left_hand_pinky3", "Left_Hand_Pinky3"),
+                    ("left_hand_pinky4", "Left_Hand_Pinky4"),
+                    ("left_hand_ring2", "Left_Hand_Ring2"),
+                    ("left_hand_ring3", "Left_Hand_Ring3"),
+                    ("left_hand_ring4", "Left_Hand_Ring4"),
+                    ("left_hand_thumb1", "Left_Hand_Thumb1"),
+                    ("left_hand_thumb2", "Left_Hand_Thumb2"),
+                    ("left_hand_thumb3", "Left_Hand_Thumb3"),
+                    ("right_hand_index2", "Right_Hand_Index2"),
+                    ("right_hand_index3", "Right_Hand_Index3"),
+                    ("right_hand_index4", "Right_Hand_Index4"),
+                    ("right_hand_middle2", "Right_Hand_Middle2"),
+                    ("right_hand_middle3", "Right_Hand_Middle3"),
+                    ("right_hand_middle4", "Right_Hand_Middle4"),
+                    ("right_hand_pinky2", "Right_Hand_Pinky2"),
+                    ("right_hand_pinky3", "Right_Hand_Pinky3"),
+                    ("right_hand_pinky4", "Right_Hand_Pinky4"),
+                    ("right_hand_ring2", "Right_Hand_Ring2"),
+                    ("right_hand_ring3", "Right_Hand_Ring3"),
+                    ("right_hand_ring4", "Right_Hand_Ring4"),
+                    ("right_hand_thumb1", "Right_Hand_Thumb1"),
+                    ("right_hand_thumb2", "Right_Hand_Thumb2"),
+                    ("right_hand_thumb3", "Right_Hand_Thumb3"),
+                    ("head", "Head"),
+                    ("neck", "Neck"),
+                    ("fc_c_jaw", "Fc_C_Jaw"),
+                    ("fc_c_lower_lip", "Fc_C_Lower_Lip"),
+                    ("fc_l_lower_lip", "Fc_L_Lower_Lip"),
+                    ("fc_r_lower_lip", "Fc_R_Lower_Lip"),
+                    ("fc_c_upper_lip", "Fc_C_Upper_Lip"),
+                    ("fc_l_brow1", "Fc_L_Brow1"),
+                    ("fc_l_brow2", "Fc_L_Brow2"),
+                    ("fc_l_brow3", "Fc_L_Brow3"),
+                    ("fc_l_inner_eyelid", "Fc_L_Inner_Eyelid"),
+                    ("fc_l_lower_eyelid", "Fc_L_Lower_Eyelid"),
+                    ("fc_l_outer_eyelid", "Fc_L_Outer_Eyelid"),
+                    ("fc_l_outer_lip", "Fc_L_Outer_Lip"),
+                    ("fc_l_upper_eyelid", "Fc_L_Upper_Eyelid"),
+                    ("fc_l_upper_lip", "Fc_L_Upper_Lip"),
+                    ("fc_r_brow1", "Fc_R_Brow1"),
+                    ("fc_r_brow2", "Fc_R_Brow2"),
+                    ("fc_r_brow3", "Fc_R_Brow3"),
+                    ("fc_r_inner_eyelid", "Fc_R_Inner_Eyelid"),
+                    ("fc_r_lower_eyelid", "Fc_R_Lower_Eyelid"),
+                    ("fc_r_outer_eyelid", "Fc_R_Outer_Eyelid"),
+                    ("fc_r_outer_lip", "Fc_R_Outer_Lip"),
+                    ("fc_r_upper_eyelid", "Fc_R_Upper_Eyelid"),
+                    ("fc_r_upper_lip", "Fc_R_Upper_Lip")
+              ]
+
+        for name, newname in namelist:
+            # get the pose bone with name
+            pb = armature_name.pose.bones.get(name)
+            # continue if no bone of that name
+            if pb is None:
+                continue
+            # rename
+            pb.name = newname
+            
+        print ("Bones Renamed")
+            
+        return {'FINISHED'} 
+
+##-----------------------------------------------------  
+
+
+class OPEN_OT_ConvertMesh(bpy.types.Operator):
+    """Applies all Modifiers"""
+    bl_label = "Apply Modifiers"
+    bl_idname = "open.applymod"
+    
+    def execute(self, context):
+        
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object]
+         
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
+                bpy.ops.object.convert(target='MESH')
+            child.select = False
+        
+                
+        bpy.context.view_layer.objects.active = armature_name
+        bpy.ops.object.mode_set(mode='POSE')        
+        bpy.ops.pose.armature_apply(selected=False)
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
+                if (cvalue.add_armature_check == True):        
+                    bpy.ops.object.modifier_add(type='ARMATURE')  
+                    bpy.context.object.modifiers["Armature"].object = armature_name
+                child.select = False
+        
+        print ("Modifiers Applied + Applied Armature Rest Pose")
+        
+        return {'FINISHED'} 
+    
+##----------------------------------------------------- 
+
+class OPEN_OT_ConvertMesh(bpy.types.Operator):
+    """Applies all Modifiers"""
+    bl_label = "Apply Modifiers"
+    bl_idname = "open.applymod"
+    
+    def execute(self, context):
+        
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object]
+         
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
+                bpy.ops.object.convert(target='MESH')
+            child.select = False
+        
+                
+        bpy.context.view_layer.objects.active = armature_name
+        bpy.ops.object.mode_set(mode='POSE')        
+        bpy.ops.pose.armature_apply(selected=False)
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                child.select = True
+                bpy.context.view_layer.objects.active = child
+                if (cvalue.add_armature_check == True):        
+                    bpy.ops.object.modifier_add(type='ARMATURE')  
+                    bpy.context.object.modifiers["Armature"].object = armature_name
+                child.select = False
+        
+        print ("Modifiers Applied + Applied Armature Rest Pose")
+        
+        return {'FINISHED'} 
+    
+##----------------------------------------------------- 
+
+
+                        
+class OPEN_OT_RemGroups(bpy.types.Operator):
+    """Removes Excess Vertex Groups"""
+    bl_label = "Remove Excess Vertex Groups"
+    bl_idname = "open.removeexcess"
+    
+    def execute(self, context):
+        
+        scene = context.scene        
+        cvalue = scene.custom_values
+
+        arm_object = cvalue.reinobjectname
+        armature_name = bpy.data.objects[arm_object]
+        
+        
+        remove_list = [ ("sub_10"),
+                        ("spine1"),
+                        ("sub_60"),
+                        ("sub_61"),
+                        ("sub_62"),
+                        ("sub_63"),
+                        ("sub_71"),
+                        ("sub_72"),
+                        ("sub_73"),
+                        ("sub_70"),
+                        ("sub_02"),
+                        ("sub_11"),
+                        ("sub_20"),
+                        ("sub_21"),
+                        ("sub_30"),
+                        ("sub_31"),
+                        ("sub_40"),
+                        ("sub_41"),
+                        ("sub_50"),
+                        ("sub_51"),                          
+                     ]
+                     
+        for child in armature_name.children:
+            if child.type == 'MESH':
+                for vg in remove_list:
+                    rem_vg = child.vertex_groups.get(vg)
+                    if rem_vg is not None:
+                         child.vertex_groups.remove(rem_vg)       
+                                         
+            
+        return {'FINISHED'}
+    
+##----------------------------------------------------- 
+
+
+
+
+                        
+class OPEN_OT_FixMats(bpy.types.Operator):
+    """Fixes Viewport Rein Materials"""
+    bl_label = "Fix Rein Materials"
+    bl_idname = "open.fixmats"
+    
+    def execute(self, context):
+        
+        object = bpy.context.active_object 
+        
+        scene = context.scene
+        file_tool = bpy.path.abspath(scene.custom_values.rein_path)
+        
+        dir_list = []
+        mso_list = []
+        mso_string = "mso_.png"
+        
+        #redundant?
+        for path in os.listdir(file_tool):
+            if (os.path.isfile(os.path.join(file_tool, path))):
+                dir_list.append(path)
+        
+        mso_list = [i for i in dir_list if mso_string in i]
+                
+        print("Retrieved MSO Maps:")    
+                  
+        
+        for material in bpy.data.materials:
+            #makes sure each material starts with mt_
+            if not material.name.startswith("mt_"): continue
+            #sets material type to hashed to fix bad backface culling
+            material.blend_method = 'HASHED'
+            
+            #isolates the material name and removed the mt_ from it -- then stores it in a variable            
+            clean_name = material.name
+            clean_name = (clean_name.replace('mt_', ''))
+            
+            #removes the 0.001 from names in clean_name in order for the script to work on them
+            period = "."
+            if period in clean_name:                
+                clean_name = clean_name[:-4]
+                
+            #appends a MSO texture string to MSO_value as long as they have a clean_name inside of it
+            mso_value = [i for i in mso_list if clean_name in i]
+            
+            #turns the MSO_value list into a string
+            image_value = ''.join(mso_value)
+            print(image_value)
+            
+            existing_image = image_value
+            
+            image_value = file_tool + "\\" + image_value
+            print(image_value)
+            #image_value = bpy.data.images.load(filepath = image_value)
+            
+            
+            #establishes material node and tree node values
+            material.use_nodes = True
+            nodes = material.node_tree.nodes
+            links = material.node_tree.links
+            
+            #resets Principled BSDF values
+            nodes["Principled BSDF"].inputs['Specular'].default_value = 0.1
+            nodes["Principled BSDF"].inputs['Emission Strength'].default_value = 0.0
+            
+            ##checks for empty MSO filepath
+            if not mso_value:
+                continue
+            else:
+                #adds the MSO map
+                inode = nodes.new('ShaderNodeTexImage')
+                inode.location = (-1000,0)
+                
+                #if the image has already been imported in the scene, it uses that. Otherwise it imports the image.
+                if existing_image in bpy.data.images:
+                    inode.image = bpy.data.images[existing_image]
+                else:                
+                    inode.image = bpy.data.images.load(image_value)       
+                
+                RGB_split = nodes.new('ShaderNodeSeparateRGB')
+                RGB_split.location = (-700,0)
+                links.new(RGB_split.inputs[0], inode.outputs[0])
+                
+                links.new(nodes["Principled BSDF"].inputs['Metallic'], RGB_split.outputs[0])
+                
+                Invert_gloss = nodes.new('ShaderNodeInvert')
+                Invert_gloss.location = (-500,0)
+                
+                links.new(Invert_gloss.inputs['Color'], RGB_split.outputs[1])
+                links.new(nodes["Principled BSDF"].inputs['Roughness'], Invert_gloss.outputs[0])
+                
+    
+            print ("Materials Adjusted")
+            
+        return {'FINISHED'}
+
+    
+##-----------------------------------------------------    
+    
+    
+class MyProperties(bpy.types.PropertyGroup):
+    
+    rein_path : bpy.props.StringProperty(
+          name = "Rein Path",
+          default = "",
+          description = "Choose the Rein Model Folder",
+          subtype = 'DIR_PATH'
+          )
+          
+    json_path : bpy.props.StringProperty(
+          name = "JSON Path",
+          default = "",
+          description = "Choose your JSON file",
+          subtype = 'DIR_PATH'
+          )
+          
+    reinobjectname : bpy.props.StringProperty(
+          name = "Armature Select",
+          default = "",
+          description = "Choose REIN Armature",
+          )
+          
+          
+    add_armature_check : bpy.props.BoolProperty(
+          name = "Reapply Armature Modifier",
+          description = "Reapplies the armature modifier after applying all modifiers",
+          default = True
+          )
+    
+          
+##----------------------------------------------------- 
+          
+
+
+classes = [MyProperties, Devola_PT_Panel, OPEN_OT_ScaleNIER, OPEN_OT_WeightMix, OPEN_OT_BoneRename, OPEN_OT_ConvertMesh, OPEN_OT_FixMats, OPEN_OT_RemGroups]
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+        bpy.types.Scene.custom_values = bpy.props.PointerProperty(type= MyProperties)
+          
+
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+        del bpy.types.Scene.custom_values
+       
+    
+if __name__ == "__main__":
+    register()
