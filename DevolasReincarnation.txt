@@ -128,7 +128,7 @@ class OPEN_OT_ScaleNIER(bpy.types.Operator):
          armature_name.scale[1] = 1
          armature_name.scale[2] = 1
          
-         print ('Rein armature scale set to 1')   
+         print (':: Rein armature scale set to 1')   
                 
          return {'FINISHED'} 
          
@@ -345,7 +345,7 @@ class OPEN_OT_WeightMix(bpy.types.Operator):
                     
                 
                 
-        print ("Weight-mix Modifiers Added")
+        print (":: Weight-mix Modifiers Added")
         
         return {'FINISHED'} 
         
@@ -516,7 +516,7 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
             namelist=namelist_A2
         elif character == '2B_1':
             namelist=namelist_2B
-        print('Bone namelist assigned to ', character_name_display)
+        print(':: Bone namelist assigned to', character_name_display)
 
         for name, newname in namelist:
             # get the pose bone with name
@@ -528,7 +528,7 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
             pb.name = newname
         
             
-        print ("Bones Renamed to ", character_name_display)
+        print (":: Bones Renamed to", character_name_display)
             
         return {'FINISHED'} 
 
@@ -573,9 +573,9 @@ class OPEN_OT_ConvertMesh(bpy.types.Operator):
                 child.select = False
         
         if (cvalue.add_armature_check == True):
-            print ("Modifiers Applied + Applied Armature Rest Pose")
+            print (":: Modifiers Applied + Reapplied Armature Modifier")
         else:
-            print ("Modifiers Applied")
+            print (":: Modifiers Applied")
         
         return {'FINISHED'} 
     
@@ -674,7 +674,7 @@ class OPEN_OT_FixMats(bpy.types.Operator):
                 links.new(nodes["Principled BSDF"].inputs['Roughness'], Invert_gloss.outputs[0])
                 
     
-            print ("Materials Adjusted")
+            print (":: Materials Adjusted")
             
         return {'FINISHED'}
     
@@ -775,7 +775,7 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
                             ]
             
             
-        print("Posing Bones for ", character_name_display)
+        print(":: Posing Bones for", character_name_display)
         
     
         
@@ -805,7 +805,7 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
             rein_constraint.invert_y = True
             rein_constraint.mix_mode = 'BEFORE'
             
-        print ("Bones Posed")
+        
             
         #Permenantly Apply Constraints Toggle    
         if (cvalue.apply_constraints_check == True):
@@ -827,7 +827,6 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
                 constraint_list = [ c for c in bone.constraints]
                 for c in constraint_list:
                     bone.constraints.remove(c)
-            print ("Removed Bone Constraints + Applied Armature Rest Pose")
                     
             for child in armature_name.children:
                 if child.type == 'MESH':
@@ -837,7 +836,10 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
                     bpy.context.object.modifiers["Armature"].object = armature_name
                     child.select = False
                     
-            
+        if (cvalue.apply_constraints_check == True):
+            print (":: Bones Posed + Constraints Permanantly Applied")
+        else:
+            print (":: Bones Posed")
                          
         
         return {'FINISHED'}     
