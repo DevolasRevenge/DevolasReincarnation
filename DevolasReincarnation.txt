@@ -6,7 +6,7 @@ from math import radians
 
 class Devola_PT_Panel(bpy.types.Panel):
     bl_idname = "ARMATURE_PT_panel"
-    bl_label = "A2 Weights Manager"
+    bl_label = "Reincarnation Weights Manager"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Devola'
@@ -18,15 +18,20 @@ class Devola_PT_Panel(bpy.types.Panel):
         cvalue = scene.custom_values
         
         row = layout.row()
+        row.label(text= "Character Selector")
+        row = layout.row()
+        row.label(text= "Character", icon= 'USER')
+        row.prop(cvalue, "character_select")
+        
+        row = layout.row()
         row.label(text= "Armature Selector")
         row = layout.row()
-        row.label(text= "REIN Armature", icon= 'OUTLINER_DATA_ARMATURE')
+        row.label(text= "Rein Armature", icon= 'OUTLINER_DATA_ARMATURE')
         row.prop_search(cvalue, "reinobjectname", bpy.data, "objects", text="")
         
         row = layout.row()
         row.label(text= "NieR Armature", icon= 'OUTLINER_DATA_ARMATURE')
-        row.prop_search(cvalue, "nierobjectname", bpy.data, "objects", text="")
-        
+        row.prop_search(cvalue, "nierobjectname", bpy.data, "objects", text="")        
         
         
         row = layout.row()
@@ -93,17 +98,21 @@ class DevolaOpen_PT_Panel(bpy.types.Panel):
  
         layout = self.layout
         
+
+        
         col = layout.column()
         
         col.prop(cvalue, 'json_path')
         
         row = layout.row()
         
+        row.label(text= "*Not Supported Yet*")
+        
         
 ##----------------------------------------------------------------
                         
 class OPEN_OT_ScaleNIER(bpy.types.Operator):
-    """Scales REIN mesh to Nier Dimensions"""
+    """Scales Rein mesh to Nier Dimensions"""
     bl_label = "Scale Rein Objects"
     bl_idname = "open.scalemesh"
     
@@ -137,6 +146,8 @@ class OPEN_OT_WeightMix(bpy.types.Operator):
 
         arm_object = cvalue.reinobjectname
         armature_name = bpy.data.objects[arm_object] 
+        
+        character = cvalue.character_select
         
         for object in armature_name.children:
             if object.type == 'MESH':
@@ -317,6 +328,23 @@ class OPEN_OT_WeightMix(bpy.types.Operator):
                 modifier.vertex_group_a = "head"
                 modifier.vertex_group_b = "fc_r_outer_eyelid"
                 
+                if character == '2B_1':
+                    modifier = object.modifiers.new(name="Right_Elbow", type='VERTEX_WEIGHT_MIX')
+                    modifier.mix_set = 'ALL'
+                    modifier.mix_mode = 'ADD'
+                    modifier.vertex_group_a = "right_arm"
+                    modifier.vertex_group_b = "sub_40"
+                    
+                    modifier = object.modifiers.new(name="Left_Elbow", type='VERTEX_WEIGHT_MIX')
+                    modifier.mix_set = 'ALL'
+                    modifier.mix_mode = 'ADD'
+                    modifier.vertex_group_a = "left_arm"
+                    modifier.vertex_group_b = "sub_41"
+                else:
+                    continue
+                    
+                
+                
         print ("Weight-mix Modifiers Added")
         
         return {'FINISHED'} 
@@ -325,7 +353,7 @@ class OPEN_OT_WeightMix(bpy.types.Operator):
     
 class OPEN_OT_BoneRename(bpy.types.Operator):
     """Rename Rein Armature Bones to NieR:Automata Bones"""
-    bl_label = "Rename Bones (to A2)"
+    bl_label = "Rename Bones (to NieR)"
     bl_idname = "open.bonerename"
     
     def execute(self, context):
@@ -339,7 +367,7 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
         arm_object = cvalue.reinobjectname
         armature_name = bpy.data.objects[arm_object] 
         
-        namelist = [("left_toe", "bone139"),
+        namelist_A2 = [("left_toe", "bone139"),
             ("right_foot", "bone134"),
             ("right_toe", "bone135"),
             ("left_foot", "bone138"),
@@ -373,9 +401,7 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
             ("right_hand_pinky3", "bone74"),
             ("right_hand_pinky4", "bone75"),
             ("sub_10", "bone76"),
-            ("right_forearm", "bone55"),
             ("sub_40", "bone78"),
-            ("left_forearm", "bone82"),
             ("sub_20", "bone103"),
             ("sub_41", "bone105"),
             ("left_hand_thumb1", "bone100"),
@@ -411,6 +437,86 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
             ("fc_l_upper_eyelid", "bone8"),
             ("fc_r_upper_eyelid", "bone7")                    
             ]
+            
+        namelist_2B = [("left_toe", "bone97"),
+            ("right_foot", "bone92"),
+            ("right_toe", "bone93"),
+            ("left_foot", "bone96"),
+            ("right_leg", "bone91"),
+            ("left_leg", "bone95"),
+            ("right_shoulder", "bone34"),
+            ("left_shoulder", "bone61"),
+            ("right_arm", "bone35"),
+            ("left_arm", "bone62"),
+            ("right_forearm", "bone36"),
+            ("left_forearm", "bone63"),
+            ("left_hand", "bone64"),
+            ("right_hand", "bone37"),
+            ("right_hand_thumb1", "bone38"),
+            ("right_hand_thumb2", "bone39"),
+            ("right_hand_thumb3", "bone40"),
+            ("right_hand_index1", "bone41"),
+            ("right_hand_index2", "bone42"),
+            ("right_hand_index3", "bone43"),
+            ("right_hand_index4", "bone44"),
+            ("right_hand_middle1", "bone45"),
+            ("right_hand_middle2", "bone46"),
+            ("right_hand_middle3", "bone47"),
+            ("right_hand_middle4", "bone48"),
+            ("right_hand_ring1", "bone49"),
+            ("right_hand_ring2", "bone50"),
+            ("right_hand_ring3", "bone51"),
+            ("right_hand_ring4", "bone52"),
+            ("right_hand_pinky1", "bone53"),
+            ("right_hand_pinky2", "bone54"),
+            ("right_hand_pinky3", "bone55"),
+            ("right_hand_pinky4", "bone56"),
+            ("sub_10", "bone57"),
+            ("sub_20", "bone84"),
+            ("left_hand_thumb1", "bone81"),
+            ("left_hand_thumb2", "bone82"),
+            ("left_hand_thumb3", "bone83"),
+            ("left_hand_index1", "bone77"),
+            ("left_hand_index2", "bone78"),
+            ("left_hand_index3", "bone79"),
+            ("left_hand_index4", "bone80"),
+            ("left_hand_middle1", "bone73"),
+            ("left_hand_middle2", "bone74"),
+            ("left_hand_middle3", "bone75"),
+            ("left_hand_middle4", "bone76"),
+            ("left_hand_ring1", "bone69"),
+            ("left_hand_ring2", "bone70"),
+            ("left_hand_ring3", "bone71"),
+            ("left_hand_ring4", "bone72"),
+            ("left_hand_pinky1", "bone65"),
+            ("left_hand_pinky2", "bone66"),
+            ("left_hand_pinky3", "bone67"),
+            ("left_hand_pinky4", "bone68"),
+            ("hip", "bone89"),
+            ("spine1", "bone3"),
+            ("spine2", "bone4"),
+            ("spine3", "bone5"),
+            ("neck", "bone6"),
+            ("head", "bone7"),
+            ("fc_c_jaw", "bone8"),
+            ("sub_02", "bone33"),
+            ("spring_f_breast001_01_02", "bone88"),
+            ("left_upleg", "bone94"),
+            ("right_upleg", "bone90"),
+            ("fc_l_upper_eyelid", "bone10"),
+            ("fc_r_upper_eyelid", "bone9")                    
+            ]
+            
+        character = cvalue.character_select
+        
+        #character_name_display is only used to display character names in the console
+        character_name_display = (character.replace('_1', ''))
+        
+        if character == 'A2_1':
+            namelist=namelist_A2
+        elif character == '2B_1':
+            namelist=namelist_2B
+        print('Bone namelist assigned to ', character_name_display)
 
         for name, newname in namelist:
             # get the pose bone with name
@@ -420,8 +526,9 @@ class OPEN_OT_BoneRename(bpy.types.Operator):
                 continue
             # rename
             pb.name = newname
+        
             
-        print ("Bones Renamed")
+        print ("Bones Renamed to ", character_name_display)
             
         return {'FINISHED'} 
 
@@ -465,7 +572,10 @@ class OPEN_OT_ConvertMesh(bpy.types.Operator):
                     bpy.context.object.modifiers["Armature"].object = armature_name
                 child.select = False
         
-        print ("Modifiers Applied + Applied Armature Rest Pose")
+        if (cvalue.add_armature_check == True):
+            print ("Modifiers Applied + Applied Armature Rest Pose")
+        else:
+            print ("Modifiers Applied")
         
         return {'FINISHED'} 
     
@@ -572,7 +682,7 @@ class OPEN_OT_FixMats(bpy.types.Operator):
           
 class OPEN_OT_BONEPOSER(bpy.types.Operator):
     """Pose Bones"""
-    bl_label = "Pose Bones (to A2)"
+    bl_label = "Pose Bones (to NieR)"
     bl_idname = "open.posebones"
     
     def execute(self, context):
@@ -630,19 +740,44 @@ class OPEN_OT_BONEPOSER(bpy.types.Operator):
             
         bpy.ops.object.mode_set(mode='POSE')
         
-        C_list_shoulders = [ ("left_shoulder", "bone80"),
-                     ("right_shoulder", "bone53")
-                     ]
+        character = cvalue.character_select
+        
+        #character_name_display is only used to display character names in the console
+        character_name_display = (character.replace('_1', ''))
+        
+        if character == 'A2_1':
+            C_list_shoulders = [ ("left_shoulder", "bone80"),
+                         ("right_shoulder", "bone53")
+                         ]
+                        
+            C_list_arms = [ ("left_arm", "bone81"),
+                            ("left_forearm", "bone82"),
+                            ("right_arm", "bone54"),
+                            ("right_forearm", "bone55")
+                            ]
                     
-        C_list_arms = [ ("left_arm", "bone81"),
-                        ("left_forearm", "bone82"),
-                        ("right_arm", "bone54"),
-                        ("right_forearm", "bone55")
-                        ]
-                
-        C_list_legs = [ ("left_upleg", "bone136"),
-                        ("right_upleg", "bone132")
-                        ]      
+            C_list_legs = [ ("left_upleg", "bone136"),
+                            ("right_upleg", "bone132")
+                            ]
+        elif character == '2B_1':
+            C_list_shoulders = [ ("left_shoulder", "bone61"),
+                         ("right_shoulder", "bone34")
+                         ]
+                        
+            C_list_arms = [ ("left_arm", "bone62"),
+                            ("left_forearm", "bone63"),
+                            ("right_arm", "bone35"),
+                            ("right_forearm", "bone36")
+                            ]
+                    
+            C_list_legs = [ ("left_upleg", "bone94"),
+                            ("right_upleg", "bone90")
+                            ]
+            
+            
+        print("Posing Bones for ", character_name_display)
+        
+    
         
         for rein_bone, nier_bone in C_list_shoulders:
             cons = rein_name.pose.bones[rein_bone].constraints
@@ -730,13 +865,13 @@ class MyProperties(bpy.types.PropertyGroup):
     reinobjectname : bpy.props.StringProperty(
           name = "Armature Select",
           default = "",
-          description = "Choose REIN Armature",
+          description = "Choose Rein Armature",
           )
           
     nierobjectname : bpy.props.StringProperty(
           name = "Armature Select",
           default = "",
-          description = "Choose REIN Armature",
+          description = "Choose Rein Armature",
           )
           
     add_armature_check : bpy.props.BoolProperty(
@@ -749,6 +884,14 @@ class MyProperties(bpy.types.PropertyGroup):
           name = "Permenantly Apply Constraints",
           description = "Locks in the constraints",
           default = True
+          )
+          
+    character_select : bpy.props.EnumProperty(
+          name = "",
+          description = "Select A2 or 2B for bonenames",
+          items =  [('A2_1', "A2", ""),
+                    ('2B_1', "2B", "")
+                ]
           )
           
 ##----------------------------------------------------- 
